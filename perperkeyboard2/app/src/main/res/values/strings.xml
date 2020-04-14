@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">UbiK</string>
+    <string name="action_settings">Settings</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="text_hint">Welcome</string>
+    <string name="button_start">Start</string>
+    <string name="title_activity_testing">UbiK_Testing</string>
+    <string name="detectionResult">detection result</string>
+    <string name="correction">click to input the correct character here</string>
+	<string name = "detectIndication">ClickTimes</string>
+	<string name = "backSpace">Backspace</string>
+	<string name = "button_restart">Restart Training</string>
+	<string name = "button_clear">Clear Current Training</string>
+	<string name = "debugKNN">show KNN</string>
+	<string name = "inputTimes_hint">Total input</string>
+	<string name = "inputTimes">input times</string>
+	<string name = "errorTimes_hint">Total Accuracy</string>
+	<string name = "errorTimes">accuracy</string>
+	<string name = "toggleshift">SHIFT</string>
+	<string name = "togglecaps">CAPS</string>
+	<string name = "recentAccuracy">recent accuracy</string>
+	<string name = "finish">finish</string>
+	<string name = "button_Dict">use Dict</string>
+	<string name = "inputRate">input rate</string>
+		<string name = "waveThreshold">wave</string>
+			<string name = "gyroThreshold">gyro</string>
+			<string name="button_Save">Save</string>
+			<string name="saveFile">File Name:</string>
+			<string name="loadknn">Load Training from File</string>
+	 <string name="DictionaryFilePath">/dic_800.txt</string>
+	 <string name="reset_training">reset</string>	 
+	 <string name="clear_canvas">clean</string>	 	 
+	 
+
+</resources>
