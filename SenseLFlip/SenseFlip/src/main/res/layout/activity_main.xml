@@ -4,6 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:gravity="center_horizontal"
+    android:orientation="vertical"
     tools:context="com.liziwl.senseflip.MainActivity">
 
     <TextView
@@ -12,5 +14,63 @@
         android:layout_height="100dp"
         android:gravity="center"
         android:textSize="40sp" />
+
+    <EditText
+        android:id="@+id/filename_prefix"
+        android:layout_width="200dp"
+        android:layout_height="50dp"
+        android:ems="10"
+        android:hint="@string/file_prefix_hint"
+        android:inputType="text"
+        android:singleLine="true" />
+
+    <TableRow
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
+        android:orientation="vertical">
+
+        <Button
+            android:id="@+id/start"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="start"
+            android:background="@color/colorPrimary"
+            android:text="@string/start"
+            android:textColor="#FFFFFF"
+            android:textStyle="bold" />
+
+        <Space
+            android:layout_width="20dp"
+            android:layout_height="wrap_content" />
+
+        <Button
+            android:id="@+id/end"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end"
+            android:background="@color/colorAccent"
+            android:text="@string/end"
+            android:textColor="#FFFFFF"
+            android:textStyle="bold" />
+
+    </TableRow>
+
+    <Space
+        android:layout_width="wrap_content"
+        android:layout_height="30dp" />
+
+    <TextView
+        android:id="@+id/log_filename"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:maxLines="10"
+        android:scrollbars="vertical"
+        android:singleLine="false"
+        android:text="test"
+        android:textAlignment="center"
+        android:textSize="18sp"
+        android:background="@drawable/border" />
+
 
 </LinearLayout>

@@ -13,6 +13,7 @@ import android.support.annotation.RequiresApi;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.widget.TextView;
 
@@ -55,6 +56,14 @@ public class MainActivity extends AppCompatActivity {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");// HH:mm:ss
         Date date = new Date(System.currentTimeMillis());
         writeToFile(String.format("%s: %s", simpleDateFormat.format(date), tvSense.getText().toString()));
+
+        TextView log_tv = findViewById(R.id.log_filename);
+        log_tv.setMovementMethod(ScrollingMovementMethod.getInstance());
+        String test_st = "";
+        for (int i = 0; i < 50; i++) {
+            test_st = test_st + "file1111.txt\n";
+        }
+        log_tv.setText(test_st);
 
     }
 

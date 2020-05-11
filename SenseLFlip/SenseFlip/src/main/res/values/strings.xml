@@ -1,3 +1,7 @@
 <resources>
-    <string name="app_name">SenseFlip</string>
+    <string name="app_name">One auth</string>
+    <string name="start">开始采集</string>
+    <string name="end">停止采集</string>
+    <string name="file_prefix_hint">Filename prefix</string>
+
 </resources>
