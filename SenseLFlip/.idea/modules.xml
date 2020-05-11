@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/SenseFlip/SenseFlip.iml" filepath="$PROJECT_DIR$/SenseFlip/SenseFlip.iml" group="SenseLFlip/SenseFlip" />
+      <module fileurl="file://$PROJECT_DIR$/SenseLFlip.iml" filepath="$PROJECT_DIR$/SenseLFlip.iml" group="SenseLFlip" />
+    </modules>
+  </component>
+</project>
