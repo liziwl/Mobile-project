@@ -10,14 +10,14 @@ import android.hardware.SensorManager;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.util.LinkedList;
 
 public class MainActivity extends AppCompatActivity {
     SensorManager mSensorManager = null;
@@ -63,12 +63,12 @@ public class MainActivity extends AppCompatActivity {
         mSensorManager.registerListener(mAccelerometerSilentListener, sensor, SensorManager.SENSOR_DELAY_FASTEST);
 
 
-        tvSampleFileName.setText(String.format("翻转次数: %d", filp_times));
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");// HH:mm:ss
-        Date date = new Date(System.currentTimeMillis());
-        util.writeToFile(
-                String.format("%s: %s", simpleDateFormat.format(date), tvSampleFileName.getText().toString()),
-                DEFAULT_FILENAME);
+        // tvSampleFileName.setText(String.format("翻转次数: %d", filp_times));
+        // SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");// HH:mm:ss
+        // Date date = new Date(System.currentTimeMillis());
+        // util.writeToFile(
+        //         String.format("%s: %s", simpleDateFormat.format(date), tvSampleFileName.getText().toString()),
+        //         DEFAULT_FILENAME);
 
         set_prefix = findViewById(R.id.update_filename);
         editText = findViewById(R.id.filename_prefix);
@@ -142,57 +142,76 @@ public class MainActivity extends AppCompatActivity {
         private float lastZ = 0;
 
         private boolean isUp = true;
+        private LinkedList<XYZ> dataList = new LinkedList<XYZ>();
+        private int queueSize;
 
         @Override
         public void onSensorChanged(SensorEvent event) {
-            long currentTime = System.currentTimeMillis();
-            float internalTime = currentTime - lastTime;
-            if (internalTime < UPDATE_INTERNAL_TIME) {
-                return;
-            }
-            lastTime = currentTime;
-
-            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");// HH:mm:ss
-            Date date = new Date(System.currentTimeMillis());
-//            time1.setText("Date获取当前日期时间"+simpleDateFormat.format(date));
+            //  long currentTime = System.currentTimeMillis();
+            //  float internalTime = currentTime - lastTime;
+            //  if (internalTime < UPDATE_INTERNAL_TIME) {
+            //      return;
+            //  }
+            //  lastTime = currentTime;
+            //
+            //  SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");// HH:mm:ss
+            //  Date date = new Date(System.currentTimeMillis());
+            // // time1.setText("Date获取当前日期时间"+simpleDateFormat.format(date));
 
 
             float x = event.values[0];
             float y = event.values[1];
             float z = event.values[2];
-            float deltaX = x - lastX;
-            float deltaY = y - lastY;
-            float deltaZ = z - lastZ;
-            lastX = x;
-            lastY = y;
-            lastZ = z;
-            boolean is_now_up = isUp;
+            if (queueSize >= 200) {
+                dataList.removeFirst();
+            }
+            queueSize++;
+            XYZ data_tmp = new XYZ(x, y, z);
+            dataList.addLast(data_tmp);
 
+            Log.d("~~~~", data_tmp.toString());
 
-            double speed = Math.sqrt(deltaX * deltaX + deltaY * deltaY + deltaZ * deltaZ) / internalTime * 10000; //算出后速度为 mm/s
-//            Log.d("!!!", String.format("%b speed%f x%.2f y%.2f z%.2f", isUp, speed, x, y, z));
-
-            if (speed > SPEED_LIMIT) {
-                return;
+            if (queueSize >= 200) {
+                XYZ head = dataList.peek();
+                long period = data_tmp.getDataTime() - head.getDataTime();
+                double rate = queueSize / (0.001 * period);
+                Log.d("~~~~", String.valueOf(rate));
             }
 
-            if (x > -2 && x < 2 && y > -2 && y < 2) {
-                if (z > 0) {
-                    is_now_up = true;
-                } else {
-                    is_now_up = false;
-                }
-            }
 
-            if (is_now_up != isUp) {
-//                Log.d("!!!", String.format("shake x%.2f y%.2f z%.2f", x, y, z));
-                filp_times++;
-                tvSampleFileName.setText(String.format("翻转次数: %d", filp_times));
-                isUp = is_now_up;
-                util.writeToFile(
-                        String.format("%s: %s", simpleDateFormat.format(date), tvSampleFileName.getText().toString()),
-                        DEFAULT_FILENAME);
-            }
+            //  float deltaX = x - lastX;
+            //  float deltaY = y - lastY;
+            //  float deltaZ = z - lastZ;
+            //  lastX = x;
+            //  lastY = y;
+            //  lastZ = z;
+            //  boolean is_now_up = isUp;
+            //
+            //
+            //  double speed = Math.sqrt(deltaX * deltaX + deltaY * deltaY + deltaZ * deltaZ) / internalTime * 10000; //算出后速度为 mm/s
+            // // Log.d("!!!", String.format("%b speed%f x%.2f y%.2f z%.2f", isUp, speed, x, y, z));
+            //
+            //  if (speed > SPEED_LIMIT) {
+            //      return;
+            //  }
+            //
+            //  if (x > -2 && x < 2 && y > -2 && y < 2) {
+            //      if (z > 0) {
+            //          is_now_up = true;
+            //      } else {
+            //          is_now_up = false;
+            //      }
+            //  }
+            //
+            //  if (is_now_up != isUp) {
+            //     // Log.d("!!!", String.format("shake x%.2f y%.2f z%.2f", x, y, z));
+            //      filp_times++;
+            //      // tvSampleFileName.setText(String.format("翻转次数: %d", filp_times));
+            //      // isUp = is_now_up;
+            //      // util.writeToFile(
+            //      //         String.format("%s: %s", simpleDateFormat.format(date), tvSampleFileName.getText().toString()),
+            //      //         DEFAULT_FILENAME);
+            //  }
         }
 
         @Override
@@ -204,7 +223,7 @@ public class MainActivity extends AppCompatActivity {
     public static void verifyStoragePermissions(Activity activity) {
 
         try {
-            //检测是否有写的权限
+            // 检测是否有写的权限
             int permission = ActivityCompat.checkSelfPermission(activity,
                     "android.permission.WRITE_EXTERNAL_STORAGE");
             if (permission != PackageManager.PERMISSION_GRANTED) {
