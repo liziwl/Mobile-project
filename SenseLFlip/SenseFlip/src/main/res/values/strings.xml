@@ -1,7 +1,11 @@
 <resources>
     <string name="app_name">One auth</string>
+    <string name="set_name">设置前缀</string>
     <string name="start">开始采集</string>
     <string name="end">停止采集</string>
     <string name="file_prefix_hint">Filename prefix</string>
+    <string name="default_prefix_filename">default</string>
+    <string name="stopped">已停止</string>
+    <string name="running">正录制</string>
 
 </resources>

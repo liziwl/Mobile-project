@@ -7,29 +7,37 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.os.Build;
-import android.os.Environment;
-import android.support.annotation.RequiresApi;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.text.method.ScrollingMovementMethod;
-import android.util.Log;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FileWriter;
-import java.io.OutputStreamWriter;
+
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class MainActivity extends AppCompatActivity {
     SensorManager mSensorManager = null;
     AccelerometerSilentListener mAccelerometerSilentListener = null;
-    private TextView tvSense;
+    private TextView tvSampleFileName; // 文件名样例显示框
+    private EditText editText; // 文件名前缀输入框
+    private Button set_prefix; // 设置文件名前缀
+    private String prefix; // 文件名前缀存储
+    private String filename_now; // 当前文件名
+
+
+    private TextView status_tv; // 状态文字显示
+    private boolean isRunning; // 状态记录
+    private Button start_btn; // 开始记录按钮
+    private Button end_btn; // 中止记录按钮
+
+    private TextView log_tv; // 历史文件名log显示
+
     private int filp_times = 0;
+
 
     private static final String DEFAULT_FILENAME = "SenseFlip_log.txt";
     private static final int REQUEST_EXTERNAL_STORAGE = 1;
@@ -42,31 +50,78 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        tvSense = findViewById(R.id.tv_sense);
+        tvSampleFileName = findViewById(R.id.tv_sample_filename);
         verifyStoragePermissions(this);
-        Log.d("???", Environment.getExternalStorageDirectory().toString());
+
 
         filp_times = 0;
 
+        // 注册传感器
         mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
-        Sensor sensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        Sensor sensor = mSensorManager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION);
         mAccelerometerSilentListener = new AccelerometerSilentListener();
-        mSensorManager.registerListener(mAccelerometerSilentListener, sensor, SensorManager.SENSOR_DELAY_NORMAL);
-        tvSense.setText(String.format("翻转次数: %d", filp_times));
+        mSensorManager.registerListener(mAccelerometerSilentListener, sensor, SensorManager.SENSOR_DELAY_FASTEST);
+
+
+        tvSampleFileName.setText(String.format("翻转次数: %d", filp_times));
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");// HH:mm:ss
         Date date = new Date(System.currentTimeMillis());
-        writeToFile(String.format("%s: %s", simpleDateFormat.format(date), tvSense.getText().toString()));
+        util.writeToFile(
+                String.format("%s: %s", simpleDateFormat.format(date), tvSampleFileName.getText().toString()),
+                DEFAULT_FILENAME);
 
-        TextView log_tv = findViewById(R.id.log_filename);
-        log_tv.setMovementMethod(ScrollingMovementMethod.getInstance());
-        String test_st = "";
-        for (int i = 0; i < 50; i++) {
-            test_st = test_st + "file1111.txt\n";
-        }
-        log_tv.setText(test_st);
+        set_prefix = findViewById(R.id.update_filename);
+        editText = findViewById(R.id.filename_prefix);
 
+        set_prefix.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String _prefix = editText.getText().toString();
+                updatePrefix(_prefix);
+            }
+        });
+        set_prefix.performClick();
+
+
+        status_tv = findViewById(R.id.status);
+        start_btn = findViewById(R.id.start);
+        start_btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (!isRunning) {
+                    filename_now = util.fileNameFormater(prefix);
+                    status_tv.setText(R.string.running);
+                    addLog(filename_now);
+                    isRunning = true;
+                }
+            }
+        });
+
+        end_btn = findViewById(R.id.end);
+        end_btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                status_tv.setText(R.string.stopped);
+                isRunning = false;
+            }
+        });
+        end_btn.performClick();
+
+        log_tv = findViewById(R.id.log_filename);
     }
 
+    public void addLog(String line) {
+        String old = log_tv.getText().toString();
+        old = line + "\n" + old;
+        log_tv.setText(old);
+    }
+
+    protected void updatePrefix(String new_prefix) {
+        new_prefix = new_prefix.trim();
+        String filename = new_prefix + "_%time" + ".csv";
+        tvSampleFileName.setText(filename);
+        prefix = new_prefix;
+    }
 
     @Override
     protected void onDestroy() {
@@ -132,10 +187,11 @@ public class MainActivity extends AppCompatActivity {
             if (is_now_up != isUp) {
 //                Log.d("!!!", String.format("shake x%.2f y%.2f z%.2f", x, y, z));
                 filp_times++;
-                tvSense.setText(String.format("翻转次数: %d", filp_times));
+                tvSampleFileName.setText(String.format("翻转次数: %d", filp_times));
                 isUp = is_now_up;
-                writeToFile(String.format("%s: %s", simpleDateFormat.format(date), tvSense.getText().toString()));
-
+                util.writeToFile(
+                        String.format("%s: %s", simpleDateFormat.format(date), tvSampleFileName.getText().toString()),
+                        DEFAULT_FILENAME);
             }
         }
 
@@ -155,22 +211,6 @@ public class MainActivity extends AppCompatActivity {
                 // 没有写的权限，去申请写的权限，会弹出对话框
                 ActivityCompat.requestPermissions(activity, PERMISSIONS_STORAGE, REQUEST_EXTERNAL_STORAGE);
             }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    public static void writeToFile(String context) {
-        try {
-            File file = new File(Environment.getExternalStorageDirectory(),
-                    DEFAULT_FILENAME);
-            //第二个参数意义是说是否以append方式添加内容
-            BufferedWriter bw = new BufferedWriter(
-                    new OutputStreamWriter(
-                            new FileOutputStream(file, true), "UTF-8"));
-            bw.write(context);
-            bw.write(System.lineSeparator());
-            bw.flush();
         } catch (Exception e) {
             e.printStackTrace();
         }
