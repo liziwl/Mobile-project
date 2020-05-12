@@ -14,4 +14,12 @@ public class ExampleUnitTest {
     public void addition_isCorrect() throws Exception {
         assertEquals(4, 2 + 2);
     }
+
+    @Test
+    public void testXYZ() {
+        XYZ xyz = new XYZ(1, 2, 3);
+        for (Double d : xyz.getXYZ()) {
+            System.out.println(d);
+        }
+    }
 }

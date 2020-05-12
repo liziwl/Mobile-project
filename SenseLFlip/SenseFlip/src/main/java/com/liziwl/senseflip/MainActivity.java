@@ -7,7 +7,6 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.os.SystemClock;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -18,6 +17,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 
+import java.io.IOException;
 import java.util.PriorityQueue;
 
 public class MainActivity extends AppCompatActivity {
@@ -37,7 +37,8 @@ public class MainActivity extends AppCompatActivity {
 
     private TextView log_tv; // 历史文件名log显示
 
-    private int filp_times = 0;
+    final int CAPACITY = 1000;
+    private PriorityQueue<XYZ> dataList;
 
 
     private static final String DEFAULT_FILENAME = "SenseFlip_log.txt";
@@ -55,7 +56,8 @@ public class MainActivity extends AppCompatActivity {
         verifyStoragePermissions(this);
 
 
-        filp_times = 0;
+        // filp_times = 0;
+        dataList = new PriorityQueue<>(CAPACITY, new XYZComparator());
 
         // 注册传感器
         mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
@@ -85,6 +87,9 @@ public class MainActivity extends AppCompatActivity {
 
 
         status_tv = findViewById(R.id.status);
+        status_tv.setText(R.string.stopped); // 默认值设定
+        isRunning = false;
+
         start_btn = findViewById(R.id.start);
         start_btn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -94,6 +99,7 @@ public class MainActivity extends AppCompatActivity {
                     status_tv.setText(R.string.running);
                     addLog(filename_now);
                     isRunning = true;
+                    dataList.clear();
                 }
             }
         });
@@ -104,9 +110,13 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View view) {
                 status_tv.setText(R.string.stopped);
                 isRunning = false;
+                try {
+                    util.dumpQueue(dataList, filename_now);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         });
-        end_btn.performClick();
 
         log_tv = findViewById(R.id.log_filename);
     }
@@ -144,7 +154,7 @@ public class MainActivity extends AppCompatActivity {
         //
         // private boolean isUp = true;
         // private int queueSize;
-        private PriorityQueue<XYZ> dataList = new PriorityQueue<>(200,new XYZComparator());
+
 
         @Override
         public void onSensorChanged(SensorEvent event) {
@@ -164,22 +174,20 @@ public class MainActivity extends AppCompatActivity {
             float y = event.values[1];
             float z = event.values[2];
             long timeStamp = event.timestamp;
-            // long timeStamp = event.timestamp + SystemClock.elapsedRealtimeNanos();
 
-            while (dataList.size()>=200){
+            // 限制大小
+            while (dataList.size() >= CAPACITY) {
                 // Log.d("SIZE", String.valueOf(dataList.size()));
                 dataList.poll();
             }
 
-            // queueSize++;
             XYZ data_tmp = new XYZ(x, y, z, timeStamp);
             dataList.add(data_tmp);
-
             Log.d("~~~~", data_tmp.toString());
 
-            if (dataList.size()>=2) {
+            if (dataList.size() >= 2) {
                 XYZ head = dataList.peek();
-                long period = data_tmp.getDataTimeNano() - head.getDataTimeNano();
+                long period = data_tmp.getTimestamp() - head.getTimestamp();
                 Log.d("~~~~!period", String.valueOf(1.0E-9 * period));
                 double rate = dataList.size() / (1.0E-9 * period);
                 Log.d("~~~~!rate", String.valueOf(rate));
