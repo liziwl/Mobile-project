@@ -59,7 +59,7 @@ public class MainActivity extends AppCompatActivity {
 
         // 注册传感器
         mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
-        Sensor sensor = mSensorManager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION);
+        Sensor sensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         mAccelerometerSilentListener = new AccelerometerSilentListener();
         mSensorManager.registerListener(mAccelerometerSilentListener, sensor, SensorManager.SENSOR_DELAY_FASTEST);
 
@@ -167,6 +167,7 @@ public class MainActivity extends AppCompatActivity {
             // long timeStamp = event.timestamp + SystemClock.elapsedRealtimeNanos();
 
             while (dataList.size()>=200){
+                // Log.d("SIZE", String.valueOf(dataList.size()));
                 dataList.poll();
             }
 
