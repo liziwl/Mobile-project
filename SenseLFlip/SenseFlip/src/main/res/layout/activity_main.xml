@@ -87,9 +87,12 @@
 
     </TableRow>
 
-    <Space
-        android:layout_width="wrap_content"
-        android:layout_height="30dp" />
+    <TextView
+        android:id="@+id/tv_sample_rate"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:gravity="center_horizontal"
+        android:textSize="24sp" />
 
     <ScrollView
         android:layout_width="match_parent"

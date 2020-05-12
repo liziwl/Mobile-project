@@ -35,6 +35,7 @@ public class MainActivity extends AppCompatActivity {
     private Button start_btn; // 开始记录按钮
     private Button end_btn; // 中止记录按钮
 
+    private TextView sample_rate_tv; // 采样率显示
     private TextView log_tv; // 历史文件名log显示
 
     final int CAPACITY = 1000;
@@ -119,6 +120,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         log_tv = findViewById(R.id.log_filename);
+        sample_rate_tv = findViewById(R.id.tv_sample_rate);
     }
 
     public void addLog(String line) {
@@ -191,7 +193,9 @@ public class MainActivity extends AppCompatActivity {
                 Log.d("~~~~!period", String.valueOf(1.0E-9 * period));
                 double rate = dataList.size() / (1.0E-9 * period);
                 Log.d("~~~~!rate", String.valueOf(rate));
+                sample_rate_tv.setText(String.format("%.2f Hz", rate));
             }
+
             //  float deltaX = x - lastX;
             //  float deltaY = y - lastY;
 
