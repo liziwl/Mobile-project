@@ -7,6 +7,7 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.os.SystemClock;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -17,7 +18,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 
-import java.util.LinkedList;
+import java.util.PriorityQueue;
 
 public class MainActivity extends AppCompatActivity {
     SensorManager mSensorManager = null;
@@ -133,17 +134,17 @@ public class MainActivity extends AppCompatActivity {
 
 
     private class AccelerometerSilentListener implements SensorEventListener {
-        private static final int SPEED_LIMIT = 800; //速度阀指
-        private static final int UPDATE_INTERNAL_TIME = 60; //两次取样时间差
-        private long lastTime = 0;
-
-        private float lastX = 0;
-        private float lastY = 0;
-        private float lastZ = 0;
-
-        private boolean isUp = true;
-        private LinkedList<XYZ> dataList = new LinkedList<XYZ>();
-        private int queueSize;
+        // private static final int SPEED_LIMIT = 800; //速度阀指
+        // private static final int UPDATE_INTERNAL_TIME = 60; //两次取样时间差
+        // private long lastTime = 0;
+        //
+        // private float lastX = 0;
+        // private float lastY = 0;
+        // private float lastZ = 0;
+        //
+        // private boolean isUp = true;
+        // private int queueSize;
+        private PriorityQueue<XYZ> dataList = new PriorityQueue<>(200,new XYZComparator());
 
         @Override
         public void onSensorChanged(SensorEvent event) {
@@ -162,25 +163,30 @@ public class MainActivity extends AppCompatActivity {
             float x = event.values[0];
             float y = event.values[1];
             float z = event.values[2];
-            if (queueSize >= 200) {
-                dataList.removeFirst();
+            long timeStamp = event.timestamp;
+            // long timeStamp = event.timestamp + SystemClock.elapsedRealtimeNanos();
+
+            while (dataList.size()>=200){
+                dataList.poll();
             }
-            queueSize++;
-            XYZ data_tmp = new XYZ(x, y, z);
-            dataList.addLast(data_tmp);
+
+            // queueSize++;
+            XYZ data_tmp = new XYZ(x, y, z, timeStamp);
+            dataList.add(data_tmp);
 
             Log.d("~~~~", data_tmp.toString());
 
-            if (queueSize >= 200) {
+            if (dataList.size()>=2) {
                 XYZ head = dataList.peek();
-                long period = data_tmp.getDataTime() - head.getDataTime();
-                double rate = queueSize / (0.001 * period);
-                Log.d("~~~~", String.valueOf(rate));
+                long period = data_tmp.getDataTimeNano() - head.getDataTimeNano();
+                Log.d("~~~~!period", String.valueOf(1.0E-9 * period));
+                double rate = dataList.size() / (1.0E-9 * period);
+                Log.d("~~~~!rate", String.valueOf(rate));
             }
-
-
             //  float deltaX = x - lastX;
             //  float deltaY = y - lastY;
+
+
             //  float deltaZ = z - lastZ;
             //  lastX = x;
             //  lastY = y;
