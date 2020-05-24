@@ -3,11 +3,14 @@ package com.liziwl.senseflip;
 import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
+import android.graphics.Typeface;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -23,6 +26,7 @@ import java.util.PriorityQueue;
 public class MainActivity extends AppCompatActivity {
     SensorManager mSensorManager = null;
     AccelerometerSilentListener mAccelerometerSilentListener = null;
+    private static Context context;
     private TextView tvSampleFileName; // 文件名样例显示框
     private EditText editText; // 文件名前缀输入框
     private Button set_prefix; // 设置文件名前缀
@@ -53,6 +57,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        context = getApplicationContext();
         tvSampleFileName = findViewById(R.id.tv_sample_filename);
         verifyStoragePermissions(this);
 
@@ -98,6 +103,10 @@ public class MainActivity extends AppCompatActivity {
                 if (!isRunning) {
                     filename_now = util.fileNameFormater(prefix);
                     status_tv.setText(R.string.running);
+                    status_tv.setBackgroundColor(ContextCompat.getColor(context, R.color.rec));
+                    status_tv.setTextColor(Color.parseColor("#FFFFFF"));
+                    status_tv.setTypeface(null, Typeface.BOLD);
+                    ;
                     addLog(filename_now);
                     isRunning = true;
                     dataList.clear();
@@ -110,10 +119,14 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 status_tv.setText(R.string.stopped);
+                status_tv.setBackgroundColor(0);
+                status_tv.setTextColor(ContextCompat.getColor(context, android.R.color.tab_indicator_text));
+                status_tv.setTypeface(null, Typeface.NORMAL);
+                ;
                 isRunning = false;
                 try {
                     util.dumpQueue(dataList, filename_now);
-                } catch (IOException e) {
+                } catch (IOException | NullPointerException e) {
                     e.printStackTrace();
                 }
             }
