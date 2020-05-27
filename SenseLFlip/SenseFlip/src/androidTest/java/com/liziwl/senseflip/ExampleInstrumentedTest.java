@@ -21,6 +21,6 @@ public class ExampleInstrumentedTest {
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getTargetContext();
 
-        assertEquals("com.liziwl.senselist", appContext.getPackageName());
+        assertEquals("com.liziwl.senseflip", appContext.getPackageName());
     }
 }
