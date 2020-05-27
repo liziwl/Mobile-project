@@ -111,8 +111,8 @@ public class CollectFragment extends Fragment {
         set_prefix.performClick();
 
 
-        status_tv = root.findViewById(R.id.status);
-        status_tv.setText(R.string.stopped); // 默认值设定
+        status_tv = root.findViewById(R.id.status_collect);
+        status_tv.setText(R.string.collect_stopped); // 默认值设定
         isRunning = false;
 
         start_btn = root.findViewById(R.id.start);
@@ -121,7 +121,7 @@ public class CollectFragment extends Fragment {
             public void onClick(View view) {
                 if (!isRunning) {
                     filename_now = util.fileNameFormater(prefix);
-                    status_tv.setText(R.string.running);
+                    status_tv.setText(R.string.collect_running);
                     status_tv.setBackgroundColor(ContextCompat.getColor(context, R.color.rec));
                     status_tv.setTextColor(Color.parseColor("#FFFFFF"));
                     status_tv.setTypeface(null, Typeface.BOLD);
@@ -137,7 +137,7 @@ public class CollectFragment extends Fragment {
         end_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                status_tv.setText(R.string.stopped);
+                status_tv.setText(R.string.collect_stopped);
                 status_tv.setBackgroundColor(0);
                 status_tv.setTextColor(ContextCompat.getColor(context, android.R.color.tab_indicator_text));
                 status_tv.setTypeface(null, Typeface.NORMAL);

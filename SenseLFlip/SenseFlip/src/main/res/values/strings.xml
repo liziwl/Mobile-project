@@ -1,15 +1,26 @@
 <resources>
     <string name="app_name">One auth</string>
-    <string name="set_name">设置前缀</string>
-    <string name="start">开始采集</string>
-    <string name="end">停止采集</string>
+    <string name="set_filename">设置前缀</string>
+    <string name="start_collect">开始采集</string>
+    <string name="end_collect">停止采集</string>
     <string name="file_prefix_hint">Filename prefix</string>
     <string name="default_prefix_filename">default</string>
-    <string name="stopped">已停止</string>
-    <string name="running">正录制</string>
+    <string name="collect_stopped">已停止</string>
+    <string name="collect_running">正录制</string>
 
     <string name="title_activity_main2">One Auth</string>
     <string name="title_collect">One Auth - 采集</string>
     <string name="title_testBoard">One Auth - 测试</string>
+
+    <string name="set_username">设置用户名</string>
+    <string name="username_hint">Username</string>
+    <string name="default_username">default</string>
+    <string name="start_tesing">开始验证</string>
+    <string name="tesing_stopped">已停止</string>
+    <string name="tesing_running">正监听</string>
+    <string name="tesing_good">通过</string>
+    <string name="tesing_bad">失败</string>
+
+
 
 </resources>

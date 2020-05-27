@@ -22,13 +22,13 @@ public class TestBoardFragment extends Fragment {
         testBoardViewModel =
                 ViewModelProviders.of(this).get(TestBoardViewModel.class);
         View root = inflater.inflate(R.layout.fragment_testboard, container, false);
-        final TextView textView = root.findViewById(R.id.text_dashboard);
-        testBoardViewModel.getText().observe(getViewLifecycleOwner(), new Observer<String>() {
-            @Override
-            public void onChanged(@Nullable String s) {
-                textView.setText(s);
-            }
-        });
+        // final TextView textView = root.findViewById(R.id.text_dashboard);
+        // testBoardViewModel.getText().observe(getViewLifecycleOwner(), new Observer<String>() {
+        //     @Override
+        //     public void onChanged(@Nullable String s) {
+        //         textView.setText(s);
+        //     }
+        // });
         return root;
     }
 }
