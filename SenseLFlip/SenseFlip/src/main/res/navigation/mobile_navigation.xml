@@ -7,7 +7,7 @@
 
     <fragment
         android:id="@+id/navigation_collect"
-        android:name="com.liziwl.senseflip.ui.Collect.CollectFragment"
+        android:name="com.liziwl.senseflip.ui.collect.CollectFragment"
         android:label="@string/title_collect"
         tools:layout="@layout/fragment_collect" />
 

@@ -1,6 +1,10 @@
 package com.liziwl.senseflip;
 
-public class XYZComparator {
+import java.util.Comparator;
+
+public class XYZComparator implements Comparator<XYZ> {
+
+    @Override
     public int compare(XYZ data1, XYZ data2) {
         if (data1.timestamp < data2.timestamp) {
             return -1;
