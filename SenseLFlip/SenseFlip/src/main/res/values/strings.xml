@@ -8,4 +8,8 @@
     <string name="stopped">已停止</string>
     <string name="running">正录制</string>
 
+    <string name="title_activity_main2">One Auth</string>
+    <string name="title_collect">One Auth - 采集</string>
+    <string name="title_testBoard">One Auth - 测试</string>
+
 </resources>
