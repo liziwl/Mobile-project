@@ -25,6 +25,7 @@ class JudgeHandler(Resource):
 
     def post(self):
         json_data = request.get_json()
+        print(json_data)
         if json_data:
             try:
                 return sample_response, 200
