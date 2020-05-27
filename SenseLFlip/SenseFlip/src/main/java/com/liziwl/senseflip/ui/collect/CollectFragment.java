@@ -1,4 +1,4 @@
-package com.liziwl.senseflip.ui.Collect;
+package com.liziwl.senseflip.ui.collect;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
