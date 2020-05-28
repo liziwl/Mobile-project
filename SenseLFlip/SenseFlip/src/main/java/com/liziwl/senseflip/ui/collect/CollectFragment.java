@@ -273,7 +273,7 @@ public class CollectFragment extends Fragment {
         }
     }
 
-    public static void verifyStoragePermissions(Activity activity) {
+    private static void verifyStoragePermissions(Activity activity) {
 
         try {
             // 检测是否有写的权限

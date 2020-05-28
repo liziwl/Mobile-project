@@ -1,29 +1,37 @@
 package com.liziwl.senseflip.ui.testBoard;
 
+import android.app.Activity;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
+import android.widget.Button;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 
 import com.liziwl.senseflip.R;
 
 import org.json.JSONObject;
 
+import java.io.BufferedReader;
 import java.io.DataOutputStream;
+import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
 public class TestBoardFragment extends Fragment {
 
+    private static final String[] PERMISSIONS_INTERNET = {"android.permission.INTERNET"};
+    private static final int REQUEST_CODE_INTERNET = 1;
     private TestBoardViewModel testBoardViewModel;
-    final String JUDGE_URL = "http://127.0.0.1:5000/judge";
+    final String JUDGE_URL = "http://10.20.20.156:5000/judge";
+
+    private Button start_btn; // 开始记录按钮
+
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -37,6 +45,18 @@ public class TestBoardFragment extends Fragment {
         //         textView.setText(s);
         //     }
         // });
+
+        verifyNetworkPermissions(getActivity());
+        start_btn = root.findViewById(R.id.start2);
+        start_btn.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View view) {
+                Log.d("JSON", "send json");
+                sendPost();
+            }
+        });
+
         return root;
     }
 
@@ -49,23 +69,32 @@ public class TestBoardFragment extends Fragment {
                     HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                     conn.setRequestMethod("POST");
                     conn.setRequestProperty("Content-Type", "application/json;charset=UTF-8");
-                    conn.setRequestProperty("Accept","application/json");
+                    conn.setRequestProperty("Accept", "application/json");
                     conn.setDoOutput(true);
                     conn.setDoInput(true);
 
-                    JSONObject jsonParam = new JSONObject();
-                    jsonParam.put("timestamp", 1488873360);
+                    JSONObject req_json = new JSONObject();
+                    req_json.put("timestamp", 1488873360);
 
-                    Log.i("JSON", jsonParam.toString());
-                    DataOutputStream os = new DataOutputStream(conn.getOutputStream());
+                    Log.i("JSON", req_json.toString());
+                    DataOutputStream outputStream = new DataOutputStream(conn.getOutputStream());
                     //os.writeBytes(URLEncoder.encode(jsonParam.toString(), "UTF-8"));
-                    os.writeBytes(jsonParam.toString());
+                    outputStream.writeBytes(req_json.toString());
 
-                    os.flush();
-                    os.close();
+                    outputStream.flush();
+                    outputStream.close();
 
-                    Log.i("STATUS", String.valueOf(conn.getResponseCode()));
-                    Log.i("MSG" , conn.getResponseMessage());
+                    StringBuilder response_json_str = new StringBuilder();
+                    String line;
+                    BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream(), "UTF-8"));
+                    while ((line = in.readLine()) != null) {
+                        response_json_str.append(line);
+                    }
+                    // 解析返回json对象
+                    JSONObject resp_json = new JSONObject(response_json_str.toString());
+                    Log.i("JSON-response", resp_json.toString());
+                    Log.i("JSON-STATUS", String.valueOf(conn.getResponseCode()));
+                    Log.i("JSON-MSG", conn.getResponseMessage());
 
                     conn.disconnect();
                 } catch (Exception e) {
@@ -75,5 +104,21 @@ public class TestBoardFragment extends Fragment {
         });
 
         thread.start();
+    }
+
+
+    private static void verifyNetworkPermissions(Activity activity) {
+
+        try {
+            // 检测是否有网络的权限
+            int permission = ActivityCompat.checkSelfPermission(activity,
+                    "android.permission.WRITE_EXTERNAL_STORAGE");
+            if (permission != PackageManager.PERMISSION_GRANTED) {
+                // 没有网络的权限，去申请网络的权限，会弹出对话框
+                ActivityCompat.requestPermissions(activity, PERMISSIONS_INTERNET, REQUEST_CODE_INTERNET);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }
