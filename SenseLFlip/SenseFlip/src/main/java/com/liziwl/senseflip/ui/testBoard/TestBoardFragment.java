@@ -78,7 +78,6 @@ public class TestBoardFragment extends Fragment {
 
                     Log.i("JSON", req_json.toString());
                     DataOutputStream outputStream = new DataOutputStream(conn.getOutputStream());
-                    //os.writeBytes(URLEncoder.encode(jsonParam.toString(), "UTF-8"));
                     outputStream.writeBytes(req_json.toString());
 
                     outputStream.flush();
