@@ -22,13 +22,14 @@ import java.io.DataOutputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 
 public class TestBoardFragment extends Fragment {
 
     private static final String[] PERMISSIONS_INTERNET = {"android.permission.INTERNET"};
     private static final int REQUEST_CODE_INTERNET = 1;
     private TestBoardViewModel testBoardViewModel;
-    final String JUDGE_URL = "http://10.20.20.156:5000/judge";
+    final String JUDGE_URL = "http://vm.liziwl.cn:5000/judge";
 
     private Button start_btn; // 开始记录按钮
 
@@ -72,6 +73,8 @@ public class TestBoardFragment extends Fragment {
                     conn.setRequestProperty("Accept", "application/json");
                     conn.setDoOutput(true);
                     conn.setDoInput(true);
+                    conn.setConnectTimeout(5 * 1000); // millisecond
+                    conn.setReadTimeout(5 * 1000); // millisecond
 
                     JSONObject req_json = new JSONObject();
                     req_json.put("timestamp", 1488873360);
@@ -85,7 +88,7 @@ public class TestBoardFragment extends Fragment {
 
                     StringBuilder response_json_str = new StringBuilder();
                     String line;
-                    BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream(), "UTF-8"));
+                    BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8));
                     while ((line = in.readLine()) != null) {
                         response_json_str.append(line);
                     }
