@@ -169,8 +169,8 @@ public class CollectFragment extends Fragment {
     }
 
     @Override
-    public void onDestroy() {
-        super.onDestroy();
+    public void onDestroyView() {
+        super.onDestroyView();
         if (mSensorManager != null) {
             mSensorManager.unregisterListener(mAccelerometerSilentListener);
         }

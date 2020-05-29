@@ -51,6 +51,7 @@ public class TestBoardFragment extends Fragment {
     private TextView testStatus;
     private Button bt_doVerify; // 开始记录按钮
     private Boolean isRunning;
+    private TextView sample_rate_tv;
 
 
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -108,6 +109,10 @@ public class TestBoardFragment extends Fragment {
 
             }
         });
+
+
+        sample_rate_tv = root.findViewById(R.id.tv_sample_rate2);
+
 
 
         return root;
