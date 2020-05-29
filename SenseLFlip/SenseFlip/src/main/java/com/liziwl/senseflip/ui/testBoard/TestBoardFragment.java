@@ -1,9 +1,15 @@
 package com.liziwl.senseflip.ui.testBoard;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.Context;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
+import android.graphics.Typeface;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,6 +18,8 @@ import android.widget.Button;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.arch.lifecycle.ViewModelProviders;
+import android.widget.EditText;
+import android.widget.TextView;
 
 import com.liziwl.senseflip.R;
 
@@ -23,6 +31,8 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.Random;
+
 
 public class TestBoardFragment extends Fragment {
 
@@ -30,8 +40,17 @@ public class TestBoardFragment extends Fragment {
     private static final int REQUEST_CODE_INTERNET = 1;
     private TestBoardViewModel testBoardViewModel;
     final String JUDGE_URL = "http://vm.liziwl.cn:5000/judge";
+    private Context context;
 
-    private Button start_btn; // 开始记录按钮
+
+    private TextView tvAuthName; // 用户名
+    private EditText editText; // 文件名前缀输入框
+    private Button set_authName; // 开始记录按钮
+
+    private TextView tvValid;
+    private TextView testStatus;
+    private Button bt_doVerify; // 开始记录按钮
+    private Boolean isRunning;
 
 
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -48,17 +67,83 @@ public class TestBoardFragment extends Fragment {
         // });
 
         verifyNetworkPermissions(getActivity());
-        start_btn = root.findViewById(R.id.start2);
-        start_btn.setOnClickListener(new View.OnClickListener() {
+        context = getActivity().getApplicationContext();
+
+        tvAuthName = root.findViewById(R.id.tv_testing_username);
+        editText = root.findViewById(R.id.et_username);
+        set_authName = root.findViewById(R.id.update_username);
+        set_authName.setOnClickListener(new View.OnClickListener() {
+            @SuppressLint("SetTextI18n")
+            @Override
+            public void onClick(View view) {
+                String new_name = editText.getText().toString().trim();
+                testBoardViewModel.setAuthName(new_name);
+                tvAuthName.setText("当前测试用户：" + new_name);
+            }
+        });
+        set_authName.performClick();
+
+
+        tvValid = root.findViewById(R.id.tv_valid);
+        testStatus = root.findViewById(R.id.status_collect);
+        bt_doVerify = root.findViewById(R.id.start2);
+        isRunning = false;
+        bt_doVerify.setOnClickListener(new View.OnClickListener() {
 
             @Override
             public void onClick(View view) {
-                Log.d("JSON", "send json");
-                sendPost();
+                if (!isRunning) {
+                    do_start();
+                    isRunning = true;
+                    Log.d("JSON", "send json");
+                    sendPost();
+
+                    new Handler().postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            do_stop(getRandomBoolean());
+                        }
+                    }, 1000); // 延时1秒
+                }
+
             }
         });
 
+
         return root;
+    }
+
+    public boolean getRandomBoolean() {
+        Random random = new Random();
+        return random.nextBoolean();
+    }
+
+    public void do_start() {
+        testStatus.setText(R.string.tesing_running);
+        testStatus.setBackgroundColor(ContextCompat.getColor(context, R.color.rec));
+        testStatus.setTextColor(Color.parseColor("#FFFFFF"));
+        testStatus.setTypeface(null, Typeface.BOLD);
+
+        tvValid.setText(R.string.wait_auth);
+        tvValid.setBackgroundColor(0);
+        tvValid.setTextColor(ContextCompat.getColor(context, android.R.color.tab_indicator_text));
+    }
+
+    public void do_stop(Boolean passed) {
+        testStatus.setText(R.string.tesing_stopped);
+        testStatus.setBackgroundColor(0);
+        testStatus.setTextColor(ContextCompat.getColor(context, android.R.color.tab_indicator_text));
+        testStatus.setTypeface(null, Typeface.NORMAL);
+        if (passed) {
+            tvValid.setTextColor(Color.parseColor("#FFFFFF"));
+            tvValid.setBackgroundColor(ContextCompat.getColor(context, R.color.good));
+            tvValid.setText(R.string.tesing_good);
+        } else {
+            tvValid.setTextColor(ContextCompat.getColor(context, R.color.black));
+            tvValid.setBackgroundColor(ContextCompat.getColor(context, R.color.bad));
+            tvValid.setText(R.string.tesing_bad);
+        }
+        isRunning = false;
     }
 
     public void sendPost() {

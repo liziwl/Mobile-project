@@ -125,7 +125,6 @@ public class CollectFragment extends Fragment {
                     status_tv.setBackgroundColor(ContextCompat.getColor(context, R.color.rec));
                     status_tv.setTextColor(Color.parseColor("#FFFFFF"));
                     status_tv.setTypeface(null, Typeface.BOLD);
-                    ;
                     addLog(filename_now);
                     isRunning = true;
                     dataList.clear();
@@ -141,7 +140,6 @@ public class CollectFragment extends Fragment {
                 status_tv.setBackgroundColor(0);
                 status_tv.setTextColor(ContextCompat.getColor(context, android.R.color.tab_indicator_text));
                 status_tv.setTypeface(null, Typeface.NORMAL);
-                ;
                 isRunning = false;
                 try {
                     util.dumpQueue(dataList, filename_now);

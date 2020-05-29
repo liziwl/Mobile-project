@@ -18,9 +18,10 @@
     <string name="start_tesing">开始验证</string>
     <string name="tesing_stopped">已停止</string>
     <string name="tesing_running">正监听</string>
+
     <string name="tesing_good">通过</string>
     <string name="tesing_bad">失败</string>
-
+    <string name="wait_auth">未验证</string>
 
 
 </resources>

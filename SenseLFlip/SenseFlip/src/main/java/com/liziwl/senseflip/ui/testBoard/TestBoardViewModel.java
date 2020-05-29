@@ -6,14 +6,18 @@ import android.arch.lifecycle.ViewModel;
 
 public class TestBoardViewModel extends ViewModel {
 
-    private MutableLiveData<String> mText;
+    private MutableLiveData<String> authName;
 
     public TestBoardViewModel() {
-        mText = new MutableLiveData<>();
-        mText.setValue("This is dashboard fragment");
+        authName = new MutableLiveData<>();
+        authName.setValue("default");
     }
 
-    public LiveData<String> getText() {
-        return mText;
+    public LiveData<String> getAuthName() {
+        return authName;
+    }
+
+    public void setAuthName(String name) {
+        authName.setValue(name);
     }
 }
