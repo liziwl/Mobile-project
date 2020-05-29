@@ -1,4 +1,4 @@
-package com.liziwl.senseflip.ui.testBoard;
+package com.liziwl.senseflip.ui.testboard;
 
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;

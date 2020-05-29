@@ -4,6 +4,9 @@ import android.os.Environment;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -66,5 +69,16 @@ public class util {
             csvPrinter.printRecord(head.getXYZ());
         }
         csvPrinter.flush();
+    }
+
+    public static JSONObject queue2Json(PriorityQueue<XYZ> priorityQueue) throws JSONException {
+        JSONObject json = new JSONObject();
+        int count = 1;
+        while (priorityQueue.peek() != null) {
+            XYZ head = priorityQueue.poll();
+            json.put(String.valueOf(count), new JSONArray(head.getXYZ()));
+            count++;
+        }
+        return json;
     }
 }

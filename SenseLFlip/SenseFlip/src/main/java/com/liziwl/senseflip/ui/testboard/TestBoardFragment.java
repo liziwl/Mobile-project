@@ -1,11 +1,14 @@
-package com.liziwl.senseflip.ui.testBoard;
+package com.liziwl.senseflip.ui.testboard;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageManager;
-import android.graphics.Color;
 import android.graphics.Typeface;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.ActivityCompat;
@@ -22,6 +25,9 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import com.liziwl.senseflip.R;
+import com.liziwl.senseflip.XYZ;
+import com.liziwl.senseflip.XYZComparator;
+import com.liziwl.senseflip.util;
 
 import org.json.JSONObject;
 
@@ -31,6 +37,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.PriorityQueue;
 import java.util.Random;
 
 
@@ -42,7 +49,6 @@ public class TestBoardFragment extends Fragment {
     final String JUDGE_URL = "http://vm.liziwl.cn:5000/judge";
     private Context context;
 
-
     private TextView tvAuthName; // 用户名
     private EditText editText; // 文件名前缀输入框
     private Button set_authName; // 开始记录按钮
@@ -51,13 +57,16 @@ public class TestBoardFragment extends Fragment {
     private TextView testStatus;
     private Button bt_doVerify; // 开始记录按钮
     private Boolean isRunning;
-    private TextView sample_rate_tv;
 
+    private TextView sample_rate_tv;
+    final int CAPACITY = 1000;
+    private PriorityQueue<XYZ> dataList;
+    SensorManager mSensorManager = null;
+    AccelerometerSilentListener mAccelerometerSilentListener = null;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-        testBoardViewModel =
-                ViewModelProviders.of(this).get(TestBoardViewModel.class);
+        testBoardViewModel = ViewModelProviders.of(this).get(TestBoardViewModel.class);
         View root = inflater.inflate(R.layout.fragment_testboard, container, false);
         // final TextView textView = root.findViewById(R.id.text_dashboard);
         // testBoardViewModel.getText().observe(getViewLifecycleOwner(), new Observer<String>() {
@@ -112,11 +121,25 @@ public class TestBoardFragment extends Fragment {
 
 
         sample_rate_tv = root.findViewById(R.id.tv_sample_rate2);
-
+        // 注册传感器
+        mSensorManager = (SensorManager) context.getSystemService(Context.SENSOR_SERVICE);
+        Sensor sensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        mAccelerometerSilentListener = new AccelerometerSilentListener();
+        mSensorManager.registerListener(mAccelerometerSilentListener, sensor, SensorManager.SENSOR_DELAY_FASTEST);
+        dataList = new PriorityQueue<>(CAPACITY, new XYZComparator());
 
 
         return root;
     }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        if (mSensorManager != null) {
+            mSensorManager.unregisterListener(mAccelerometerSilentListener);
+        }
+    }
+
 
     public boolean getRandomBoolean() {
         Random random = new Random();
@@ -166,10 +189,13 @@ public class TestBoardFragment extends Fragment {
                     conn.setConnectTimeout(5 * 1000); // millisecond
                     conn.setReadTimeout(5 * 1000); // millisecond
 
+                    JSONObject req_json_data = util.queue2Json(dataList);
                     JSONObject req_json = new JSONObject();
-                    req_json.put("timestamp", 1488873360);
+                    req_json.put("requester", testBoardViewModel.getAuthName());
+                    req_json.put("data", req_json_data);
+                    Log.i("JSON++", req_json.toString());
 
-                    Log.i("JSON", req_json.toString());
+
                     DataOutputStream outputStream = new DataOutputStream(conn.getOutputStream());
                     outputStream.writeBytes(req_json.toString());
 
@@ -213,4 +239,99 @@ public class TestBoardFragment extends Fragment {
             e.printStackTrace();
         }
     }
+
+    private class AccelerometerSilentListener implements SensorEventListener {
+        // private static final int SPEED_LIMIT = 800; //速度阀指
+        // private static final int UPDATE_INTERNAL_TIME = 60; //两次取样时间差
+        // private long lastTime = 0;
+        //
+        // private float lastX = 0;
+        // private float lastY = 0;
+        // private float lastZ = 0;
+        //
+        // private boolean isUp = true;
+        // private int queueSize;
+
+
+        @Override
+        public void onSensorChanged(SensorEvent event) {
+            //  long currentTime = System.currentTimeMillis();
+            //  float internalTime = currentTime - lastTime;
+            //  if (internalTime < UPDATE_INTERNAL_TIME) {
+            //      return;
+            //  }
+            //  lastTime = currentTime;
+            //
+            //  SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");// HH:mm:ss
+            //  Date date = new Date(System.currentTimeMillis());
+            // // time1.setText("Date获取当前日期时间"+simpleDateFormat.format(date));
+
+
+            float x = event.values[0];
+            float y = event.values[1];
+            float z = event.values[2];
+            long timeStamp = event.timestamp;
+
+            // 限制大小
+            while (dataList.size() >= CAPACITY) {
+                // Log.d("SIZE", String.valueOf(dataList.size()));
+                dataList.poll();
+            }
+
+            XYZ data_tmp = new XYZ(x, y, z, timeStamp);
+            dataList.add(data_tmp);
+            Log.d("~~~~", data_tmp.toString());
+
+            if (dataList.size() >= 2) {
+                XYZ head = dataList.peek();
+                long period = data_tmp.getTimestamp() - head.getTimestamp();
+                Log.d("~~~~!period", String.valueOf(1.0E-9 * period));
+                double rate = dataList.size() / (1.0E-9 * period);
+                Log.d("~~~~!rate", String.valueOf(rate));
+                sample_rate_tv.setText(String.format("%.2f Hz", rate));
+            }
+
+            //  float deltaX = x - lastX;
+            //  float deltaY = y - lastY;
+
+
+            //  float deltaZ = z - lastZ;
+            //  lastX = x;
+            //  lastY = y;
+            //  lastZ = z;
+            //  boolean is_now_up = isUp;
+            //
+            //
+            //  double speed = Math.sqrt(deltaX * deltaX + deltaY * deltaY + deltaZ * deltaZ) / internalTime * 10000; //算出后速度为 mm/s
+            // // Log.d("!!!", String.format("%b speed%f x%.2f y%.2f z%.2f", isUp, speed, x, y, z));
+            //
+            //  if (speed > SPEED_LIMIT) {
+            //      return;
+            //  }
+            //
+            //  if (x > -2 && x < 2 && y > -2 && y < 2) {
+            //      if (z > 0) {
+            //          is_now_up = true;
+            //      } else {
+            //          is_now_up = false;
+            //      }
+            //  }
+            //
+            //  if (is_now_up != isUp) {
+            //     // Log.d("!!!", String.format("shake x%.2f y%.2f z%.2f", x, y, z));
+            //      filp_times++;
+            //      // tvSampleFileName.setText(String.format("翻转次数: %d", filp_times));
+            //      // isUp = is_now_up;
+            //      // util.writeToFile(
+            //      //         String.format("%s: %s", simpleDateFormat.format(date), tvSampleFileName.getText().toString()),
+            //      //         DEFAULT_FILENAME);
+            //  }
+        }
+
+        @Override
+        public void onAccuracyChanged(Sensor sensor, int accuracy) {
+
+        }
+    }
+
 }

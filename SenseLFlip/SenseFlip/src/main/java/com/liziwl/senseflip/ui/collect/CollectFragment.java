@@ -65,8 +65,7 @@ public class CollectFragment extends Fragment {
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-        collectViewModel =
-                ViewModelProviders.of(this).get(CollectViewModel.class);
+        collectViewModel = ViewModelProviders.of(this).get(CollectViewModel.class);
         View root = inflater.inflate(R.layout.fragment_collect, container, false);
 
 //        final TextView textView = root.findViewById(R.id.text_home);
