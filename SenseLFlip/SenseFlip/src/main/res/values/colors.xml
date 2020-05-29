@@ -7,4 +7,5 @@
     <color name="bad">#ffd600</color>
     <color name="good">#2e7d32</color>
     <color name="black">#000000</color>
+    <color name="white">#FFFFFF</color>
 </resources>

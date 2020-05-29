@@ -123,7 +123,7 @@ public class CollectFragment extends Fragment {
                     filename_now = util.fileNameFormater(prefix);
                     status_tv.setText(R.string.collect_running);
                     status_tv.setBackgroundColor(ContextCompat.getColor(context, R.color.rec));
-                    status_tv.setTextColor(Color.parseColor("#FFFFFF"));
+                    status_tv.setTextColor(ContextCompat.getColor(context, R.color.white));
                     status_tv.setTypeface(null, Typeface.BOLD);
                     addLog(filename_now);
                     isRunning = true;

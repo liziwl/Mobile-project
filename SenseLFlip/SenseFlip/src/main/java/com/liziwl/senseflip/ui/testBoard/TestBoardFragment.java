@@ -121,7 +121,7 @@ public class TestBoardFragment extends Fragment {
     public void do_start() {
         testStatus.setText(R.string.tesing_running);
         testStatus.setBackgroundColor(ContextCompat.getColor(context, R.color.rec));
-        testStatus.setTextColor(Color.parseColor("#FFFFFF"));
+        testStatus.setTextColor(ContextCompat.getColor(context, R.color.white));
         testStatus.setTypeface(null, Typeface.BOLD);
 
         tvValid.setText(R.string.wait_auth);
@@ -135,7 +135,7 @@ public class TestBoardFragment extends Fragment {
         testStatus.setTextColor(ContextCompat.getColor(context, android.R.color.tab_indicator_text));
         testStatus.setTypeface(null, Typeface.NORMAL);
         if (passed) {
-            tvValid.setTextColor(Color.parseColor("#FFFFFF"));
+            tvValid.setTextColor(ContextCompat.getColor(context, R.color.white));
             tvValid.setBackgroundColor(ContextCompat.getColor(context, R.color.good));
             tvValid.setText(R.string.tesing_good);
         } else {
