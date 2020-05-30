@@ -29,6 +29,7 @@ import com.liziwl.senseflip.XYZ;
 import com.liziwl.senseflip.XYZComparator;
 import com.liziwl.senseflip.util;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
@@ -106,14 +107,32 @@ public class TestBoardFragment extends Fragment {
                     do_start();
                     isRunning = true;
                     Log.d("JSON", "send json");
-                    sendPost();
-
-                    new Handler().postDelayed(new Runnable() {
+                    sendPost(new HttpCallBackListener() {
                         @Override
-                        public void run() {
-                            do_stop(getRandomBoolean());
+                        public void onSuccess(JSONObject respose) {
+                            try {
+                                boolean passed = (boolean) respose.get("passed");
+                                do_stop(passed);
+                            } catch (JSONException e) {
+                                do_stop(false);
+                                e.printStackTrace();
+                            }
                         }
-                    }, 1000); // 延时1秒
+
+                        @Override
+                        public void onError(Exception e) {
+                            do_stop(false);
+                            e.printStackTrace();
+                        }
+                    });
+
+                    // 强行返回，测试用
+                    // new Handler().postDelayed(new Runnable() {
+                    //     @Override
+                    //     public void run() {
+                    //         do_stop(getRandomBoolean());
+                    //     }
+                    // }, 1000); // 延时1秒
                 }
 
             }
@@ -174,13 +193,14 @@ public class TestBoardFragment extends Fragment {
         isRunning = false;
     }
 
-    public void sendPost() {
+    public void sendPost(final HttpCallBackListener listener) {
         Thread thread = new Thread(new Runnable() {
             @Override
             public void run() {
+                HttpURLConnection conn = null;
                 try {
                     URL url = new URL(JUDGE_URL);
-                    HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                    conn = (HttpURLConnection) url.openConnection();
                     conn.setRequestMethod("POST");
                     conn.setRequestProperty("Content-Type", "application/json;charset=UTF-8");
                     conn.setRequestProperty("Accept", "application/json");
@@ -214,9 +234,20 @@ public class TestBoardFragment extends Fragment {
                     Log.i("JSON-STATUS", String.valueOf(conn.getResponseCode()));
                     Log.i("JSON-MSG", conn.getResponseMessage());
 
-                    conn.disconnect();
+                    if (listener != null) {
+                        //回调onFinish方法
+                        listener.onSuccess(resp_json);
+                    }
+
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    if (listener != null) {
+                        //回调onError方法
+                        listener.onError(e);
+                    }
+                } finally {
+                    if (conn != null) {
+                        conn.disconnect();
+                    }
                 }
             }
         });
@@ -280,14 +311,14 @@ public class TestBoardFragment extends Fragment {
 
             XYZ data_tmp = new XYZ(x, y, z, timeStamp);
             dataList.add(data_tmp);
-            Log.d("~~~~", data_tmp.toString());
+            // Log.d("~~~~", data_tmp.toString());
 
             if (dataList.size() >= 2) {
                 XYZ head = dataList.peek();
                 long period = data_tmp.getTimestamp() - head.getTimestamp();
-                Log.d("~~~~!period", String.valueOf(1.0E-9 * period));
+                // Log.d("~~~~!period", String.valueOf(1.0E-9 * period));
                 double rate = dataList.size() / (1.0E-9 * period);
-                Log.d("~~~~!rate", String.valueOf(rate));
+                // Log.d("~~~~!rate", String.valueOf(rate));
                 sample_rate_tv.setText(String.format("%.2f Hz", rate));
             }
 

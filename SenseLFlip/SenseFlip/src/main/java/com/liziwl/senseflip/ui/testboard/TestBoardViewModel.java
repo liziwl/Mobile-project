@@ -13,8 +13,8 @@ public class TestBoardViewModel extends ViewModel {
         authName.setValue("default");
     }
 
-    public LiveData<String> getAuthName() {
-        return authName;
+    public String getAuthName() {
+        return authName.getValue();
     }
 
     public void setAuthName(String name) {
