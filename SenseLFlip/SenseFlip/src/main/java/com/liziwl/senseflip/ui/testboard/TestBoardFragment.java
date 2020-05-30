@@ -11,6 +11,7 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Message;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
@@ -58,12 +59,38 @@ public class TestBoardFragment extends Fragment {
     private TextView testStatus;
     private Button bt_doVerify; // 开始记录按钮
     private Boolean isRunning;
+    private Boolean isUploading;
 
     private TextView sample_rate_tv;
     final int CAPACITY = 1000;
     private PriorityQueue<XYZ> dataList;
     SensorManager mSensorManager = null;
     AccelerometerSilentListener mAccelerometerSilentListener = null;
+    final int DO_START = 0;
+    final int DO_STOP_GOOD = 1;
+    final int DO_STOP_BAD = 2;
+
+    /*构造一个Handler，主要作用有：1）供非UI线程发送Message  2）处理Message并完成UI更新*/
+    public Handler uiHandler = new Handler(new Handler.Callback() {
+        @Override
+        public boolean handleMessage(Message msg) {
+            switch (msg.what) {
+                case 0:
+                    do_start();
+                    break;
+                case 1:
+                    do_stop(true);
+                    break;
+                case 2:
+                    do_stop(false);
+                    break;
+                default:
+                    break;
+
+            }
+            return false;
+        }
+    });
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -99,32 +126,14 @@ public class TestBoardFragment extends Fragment {
         testStatus = root.findViewById(R.id.status_collect);
         bt_doVerify = root.findViewById(R.id.start2);
         isRunning = false;
+        isUploading = false;
         bt_doVerify.setOnClickListener(new View.OnClickListener() {
 
             @Override
             public void onClick(View view) {
                 if (!isRunning) {
-                    do_start();
-                    isRunning = true;
-                    Log.d("JSON", "send json");
-                    sendPost(new HttpCallBackListener() {
-                        @Override
-                        public void onSuccess(JSONObject respose) {
-                            try {
-                                boolean passed = (boolean) respose.get("passed");
-                                do_stop(passed);
-                            } catch (JSONException e) {
-                                do_stop(false);
-                                e.printStackTrace();
-                            }
-                        }
-
-                        @Override
-                        public void onError(Exception e) {
-                            do_stop(false);
-                            e.printStackTrace();
-                        }
-                    });
+                    uiHandler.sendEmptyMessage(DO_START);
+                    dataList.clear();
 
                     // 强行返回，测试用
                     // new Handler().postDelayed(new Runnable() {
@@ -166,6 +175,7 @@ public class TestBoardFragment extends Fragment {
     }
 
     public void do_start() {
+        isRunning = true;
         testStatus.setText(R.string.tesing_running);
         testStatus.setBackgroundColor(ContextCompat.getColor(context, R.color.rec));
         testStatus.setTextColor(ContextCompat.getColor(context, R.color.white));
@@ -191,6 +201,7 @@ public class TestBoardFragment extends Fragment {
             tvValid.setText(R.string.tesing_bad);
         }
         isRunning = false;
+        isUploading = false;
     }
 
     public void sendPost(final HttpCallBackListener listener) {
@@ -283,6 +294,10 @@ public class TestBoardFragment extends Fragment {
         // private boolean isUp = true;
         // private int queueSize;
 
+        public boolean tap_detect(@NonNull XYZ data) {
+            return Math.pow(Math.abs(data.z - 8), 2) > 100;
+        }
+
 
         @Override
         public void onSensorChanged(SensorEvent event) {
@@ -321,6 +336,39 @@ public class TestBoardFragment extends Fragment {
                 // Log.d("~~~~!rate", String.valueOf(rate));
                 sample_rate_tv.setText(String.format("%.2f Hz", rate));
             }
+
+            if (isRunning && !isUploading && tap_detect(data_tmp)) {
+                Log.d("JSON", "tap_detect send json");
+                isUploading = true;
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        sendPost(new HttpCallBackListener() {
+                            @Override
+                            public void onSuccess(JSONObject respose) {
+                                try {
+                                    boolean passed = (boolean) respose.get("passed");
+                                    if (passed) {
+                                        uiHandler.sendEmptyMessage(DO_STOP_GOOD);
+                                    } else {
+                                        uiHandler.sendEmptyMessage(DO_STOP_BAD);
+                                    }
+                                } catch (JSONException e) {
+                                    uiHandler.sendEmptyMessage(DO_STOP_BAD);
+                                    e.printStackTrace();
+                                }
+                            }
+
+                            @Override
+                            public void onError(Exception e) {
+                                uiHandler.sendEmptyMessage(DO_STOP_BAD);
+                                e.printStackTrace();
+                            }
+                        });
+                    }
+                }, 500); // 延时设置（毫秒）
+            }
+
 
             //  float deltaX = x - lastX;
             //  float deltaY = y - lastY;
