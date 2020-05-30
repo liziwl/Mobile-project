@@ -25,9 +25,10 @@ class JudgeHandler(Resource):
 
     def post(self):
         json_data = request.get_json()
-        print(json_data)
         if json_data:
             try:
+                print(json_data['requester'])
+                print(sample_response)
                 return sample_response, 200
             except KeyError as e:
                 return BAD_REQUEST

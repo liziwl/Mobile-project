@@ -30,7 +30,6 @@ class JudgeHandler(Resource):
 
     def post(self):
         json_data = request.get_json()
-        print(json_data)
         if json_data:
             try:
                 requester = json_data['requester']
@@ -40,6 +39,8 @@ class JudgeHandler(Resource):
                     'passed':result,
                     'requester':requester
                 }
+                print(requester)
+                print(response)
                 return response, 200
             except KeyError as e:
                 return BAD_REQUEST
