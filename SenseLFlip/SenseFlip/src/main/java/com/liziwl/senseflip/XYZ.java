@@ -11,9 +11,6 @@ public class XYZ {
     public double z;
     public long timestamp;
 
-    public XYZ(double x, double y, double z) {
-        this(x, y, z, System.currentTimeMillis());
-    }
 
     public XYZ(double x, double y, double z, long dataTime) {
         this.x = x;

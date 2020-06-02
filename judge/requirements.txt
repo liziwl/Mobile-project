@@ -1,3 +1,4 @@
 flask
 flask-restful
 pip-chill
+pandas

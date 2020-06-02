@@ -1,4 +1,4 @@
-package com.liziwl.senseflip.ui.testBoard;
+package com.liziwl.senseflip.ui.testboard;
 
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
@@ -13,8 +13,8 @@ public class TestBoardViewModel extends ViewModel {
         authName.setValue("default");
     }
 
-    public LiveData<String> getAuthName() {
-        return authName;
+    public String getAuthName() {
+        return authName.getValue();
     }
 
     public void setAuthName(String name) {

@@ -13,7 +13,7 @@
 
     <fragment
         android:id="@+id/navigation_test"
-        android:name="com.liziwl.senseflip.ui.testBoard.TestBoardFragment"
+        android:name="com.liziwl.senseflip.ui.testboard.TestBoardFragment"
         android:label="@string/title_testBoard"
         tools:layout="@layout/fragment_testboard" />
 
