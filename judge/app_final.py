@@ -1,7 +1,7 @@
 from flask import Flask, request
 from flask_restful import Api, Resource
 import pandas as pd
-from clf import One_auth
+from one_class import One_auth
 import os
 
 
@@ -30,17 +30,16 @@ class JudgeHandler(Resource):
 
     def post(self):
         json_data = request.get_json()
+        print(json_data)
         if json_data:
             try:
                 requester = json_data['requester']
                 sample_data = pd.DataFrame(data=json_data['data'],index=['x','y','z']).transpose()
-                result = models[requester].predict(sample_data)
+                result = model.predict(sample_data,requester)
                 response = {
                     'passed':result,
                     'requester':requester
                 }
-                print(requester)
-                print(response)
                 return response, 200
             except KeyError as e:
                 return BAD_REQUEST
@@ -57,9 +56,6 @@ def hello_world():
 
 
 if __name__ == '__main__':
-    models = {}
-    for root, dirs, files in os.walk('data'):
-        for dir in dirs:
-            models[dir]=One_auth()
-            models[dir].fit(os.path.join(root,dir))
+    model = One_auth()
+    model.fit()
     app.run(host='0.0.0.0', port=5000)
