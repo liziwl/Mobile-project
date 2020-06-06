@@ -3,7 +3,11 @@ CS5010, Final project
 
 通过加速度传感器数据（500Hz），做身份识别。识别动作：单次敲击或者拍打手机背部，产生特异振动。
 
-## SenseLFlip (安卓)
+## Member
+* Changchao Sun ([@sunc2](https://github.com/sunc2))
+* Ziqiang Li ([@liziwl](https://github.com/liziwl))
+
+## SenseLFlip (Android 客户端)
 1. 采集数据保存为CSV，在手机 Download/OneAuth 文件夹下
 2. 测试新增数据
 
